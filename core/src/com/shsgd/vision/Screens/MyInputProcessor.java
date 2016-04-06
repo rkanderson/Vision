@@ -1,19 +1,20 @@
-package com.shsgd.vision;
+package com.shsgd.vision.Screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
-
-import java.security.Key;
 
 /**
  * Created by ryananderson on 3/26/16.
  */
 public class MyInputProcessor implements InputProcessor {
 
-    PlayScreen playScreen;
+    //Please note that this is only meant for PlayScreen.
+    //Other screens implement InputProcessor directly inside the class
 
-    public MyInputProcessor(PlayScreen callback) {
+    com.shsgd.vision.Screens.PlayScreen playScreen;
+
+    public MyInputProcessor(com.shsgd.vision.Screens.PlayScreen callback) {
         this.playScreen = callback;
         Gdx.input.setInputProcessor(this);
     }
@@ -22,10 +23,12 @@ public class MyInputProcessor implements InputProcessor {
     public boolean keyDown(int keycode) {
         if(keycode == Input.Keys.R){
             playScreen.restart();
-        } else if(keycode == Input.Keys.RIGHT || keycode == Input.Keys.LEFT ||
-                keycode == Input.Keys.UP || keycode == Input.Keys.W || keycode == Input.Keys.A ||
-                keycode == Input.Keys.S || keycode == Input.Keys.D){
-            playScreen.importantPlayerKeyDownEvent(keycode);
+        } else if(keycode== Input.Keys.M){
+            playScreen.returnToMenu();
+        } else if(keycode == Input.Keys.RIGHT || keycode == Input.Keys.LEFT || keycode == Input.Keys.UP){
+            playScreen.playerMovementEvent(keycode);
+        } else if( keycode == Input.Keys.W || keycode == Input.Keys.A || keycode == Input.Keys.D){
+            playScreen.gravityShiftEvent(keycode);
         } else if(keycode == Input.Keys.TAB){
             playScreen.showb2drLines = true;
         }

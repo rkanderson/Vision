@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
@@ -23,6 +24,7 @@ public class Player {
     private World world;
     private Body body;
     private Fixture fixture;
+    private Fixture foot;
     private Texture texture;
 
     //input booleans
@@ -31,7 +33,7 @@ public class Player {
     // 2nd boolean indicates if it is given priority.
     // player moves left, moveLeft == {true, true} . presses right while holding down left and moveRight == {false, true},
     // the moment left key is released, moveRight == {true, true}
-    private boolean shouldJump = false;
+    private boolean shouldJump = false, canJump = false;
 
     public Player(World world, float x, float y) {
         this.world = world;
@@ -56,6 +58,16 @@ public class Player {
         fixtureDef.friction = 0.0f;
         fixture = body.createFixture(fixtureDef);
         fixture.setUserData(this);
+        rectangle.dispose();
+
+        //Create the player "foot" sensor
+        EdgeShape edgeShape = new EdgeShape();
+        edgeShape.set(-width/4, -height/2-0.1f, width/4, -height/2-0.1f);
+        fixtureDef.shape = edgeShape;
+        fixtureDef.isSensor=true;
+        foot = body.createFixture(fixtureDef);
+        foot.setUserData(new Foot(this, orientation));
+        edgeShape.dispose();
 
     }
 
@@ -80,8 +92,9 @@ public class Player {
         }
 
         //Perhaps I shouldJump too :). again, varies with orientation
-        if(shouldJump){
+        if(shouldJump && canJump){
             shouldJump=false;
+            canJump=false;
             switch (orientation){
                 case 0:
                     body.applyLinearImpulse(0, jumpForce, 0, 0 ,true);
@@ -100,11 +113,45 @@ public class Player {
 
     }
 
+    public void updateFootBasedOnOrientation(){
+        //Updates the player foot based on the current orientation.
+        //This method should be called whenever the gravity is changed
+        ((Foot) foot.getUserData()).setOrientation(orientation);
+        EdgeShape footShape = (EdgeShape)foot.getShape();
+
+        switch (orientation){
+            //Update the fixture properties
+            case 0:
+                footShape.set(-width/4, -height/2-0.1f, width/4, -height/2-0.1f);
+                break;
+            case 1:
+                footShape.set(width/2+0.1f, height/4, width/2+0.1f, -height/4);
+                break;
+            case 2:
+                footShape.set(-width/4, height/2+0.1f, width/4, height/2+0.1f);
+                break;
+            case 3:
+                footShape.set(-width/2-0.1f, height/4, -width/2-0.1f, -height/4);
+                break;
+
+        }
+    }
+
     //PlayScreen will pass down input events important to the player class
     public void keyDown(int keycode){
+
+
+
+            //what about changing gravity? (WASD)
+
+
+
+    }
+
+    public void movementEvent(int keycode){
         if(keycode == Input.Keys.UP){
             //Jump
-            shouldJump=true;
+            if(canJump)shouldJump=true;
         } else if(keycode == Input.Keys.RIGHT){
             //move right
             moveRight[1] = true; //that's for certain
@@ -116,38 +163,38 @@ public class Player {
             if(!moveRight[0]) moveLeft[0] = true;
             //body.setLinearVelocity(-moveSpeed, body.getLinearVelocity().y);
         }
+    }
 
-
-        //what about changing gravity? (WASD)
-        else if(keycode == Input.Keys.W){
+    public void shiftGravity(int keycode){
+        //First, change the player orientation based on what key was pressed and the current orientation
+        if(keycode == Input.Keys.W){
             //reverse orientation
             switch (orientation){
                 case 0: orientation = 2; break;
                 case 1: orientation = 3; break;
                 case 2: orientation = 0; break;
-                case 3: orientation = 1; break;
-            }
-            updateWorldGravityBasedOnPlayerOrientation();
-            body.setLinearVelocity(0,0); //stop moving just cuz
+                case 3: orientation = 1; break;}
         } else if(keycode == Input.Keys.A){
-            //set gravity to the left (counter-clockwise) of the current down
+            //counter-clockwise
             if(orientation==0) orientation=3;
             else orientation-=1;
-            updateWorldGravityBasedOnPlayerOrientation();
-            body.setLinearVelocity(0,0); //stop moving just cuz
         } else if(keycode == Input.Keys.D){
+            //clockwise
             if(orientation==3) orientation=0;
             else orientation+=1;
-            updateWorldGravityBasedOnPlayerOrientation();
-            body.setLinearVelocity(0,0); //stop moving just cuz
         }
+
+        updateWorldGravityBasedOnPlayerOrientation();
+        body.setLinearVelocity(0, 0); //stop moving just cuz
+        body.setAwake(true);
+        updateFootBasedOnOrientation();
     }
 
     public void updateWorldGravityBasedOnPlayerOrientation(){
-        if(orientation==0) world.setGravity(new Vector2(0, -PlayScreen.gravity_constant)); //down
-        else if(orientation==1) world.setGravity(new Vector2(PlayScreen.gravity_constant, 0)); //right
-        else if(orientation==2) world.setGravity(new Vector2(0, PlayScreen.gravity_constant)); //up
-        else if(orientation==3) world.setGravity(new Vector2(-PlayScreen.gravity_constant, 0)); //left
+        if(orientation==0) world.setGravity(new Vector2(0, -com.shsgd.vision.Screens.PlayScreen.gravity_constant)); //down
+        else if(orientation==1) world.setGravity(new Vector2(com.shsgd.vision.Screens.PlayScreen.gravity_constant, 0)); //right
+        else if(orientation==2) world.setGravity(new Vector2(0, com.shsgd.vision.Screens.PlayScreen.gravity_constant)); //up
+        else if(orientation==3) world.setGravity(new Vector2(-com.shsgd.vision.Screens.PlayScreen.gravity_constant, 0)); //left
     }
 
     public void keyUp(int keycode){
@@ -158,6 +205,10 @@ public class Player {
             moveLeft[0] = false; moveLeft[1] = false;
             if(moveRight[1]) moveRight[0] = true;
         }
+    }
+
+    public void dispose(){
+        texture.dispose();
     }
 
     public Body getBody() {
@@ -178,5 +229,18 @@ public class Player {
 
     public int getOrientation() {
         return orientation;
+    }
+
+    public void setCanJump(boolean canJump){this.canJump=canJump;}
+
+    public class Foot {
+        public Player player;
+        public int orientation;
+        public Foot(Player player, int orientation){
+            //identity==orientation basically
+            this.player = player;
+            this.orientation = orientation;
+        }
+        public void setOrientation(int orientation){this.orientation=orientation;}
     }
 }

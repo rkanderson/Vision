@@ -1,4 +1,4 @@
-package com.shsgd.vision;
+package com.shsgd.vision.GameObjects;
 
 import com.badlogic.gdx.maps.objects.CircleMapObject;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -19,7 +19,6 @@ public class Goal {
     private Body body;
     private Fixture fixture;
 
-
     public Goal(World world, float xCenter, float yCenter, float radius) {
         this.world = world;
         BodyDef bodyDef = new BodyDef();
@@ -34,6 +33,13 @@ public class Goal {
         fixtureDef.shape = shape;
         fixture = body.createFixture(fixtureDef);
         fixture.setUserData(this);
+        shape.dispose();
     }
+
+    public  void dispose(){
+
+    }
+
+
 
 }

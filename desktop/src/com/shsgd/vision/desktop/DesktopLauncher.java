@@ -10,6 +10,7 @@ public class DesktopLauncher {
 		config.width = Main.V_WIDTH;
 		config.height = Main.V_HEIGHT;
 		config.title = Main.title;
+		config.foregroundFPS = 60;
 		new LwjglApplication(new Main(), config);
 	}
 }
