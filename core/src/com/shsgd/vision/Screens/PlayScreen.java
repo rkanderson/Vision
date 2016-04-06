@@ -26,6 +26,7 @@ import com.shsgd.vision.GameObjects.StageBounds;
 import com.shsgd.vision.Main;
 import com.shsgd.vision.GameObjects.Platform;
 import com.shsgd.vision.Player;
+import com.shsgd.vision.Scenes.Hud;
 import com.shsgd.vision.Tools.B2WorldCreator;
 
 /**
@@ -59,6 +60,7 @@ public class PlayScreen implements Screen, ContactListener{
     private Array<Platform> platforms = new Array<Platform>();
     private StageBounds stageBounds;
     private Texture bg;
+    private Hud hud;
 
     //input booleans
     public boolean showb2drLines = false; //this gets true in MyInputProcessor
@@ -92,7 +94,12 @@ public class PlayScreen implements Screen, ContactListener{
         platforms = creator.getPlatforms();
         stageBounds = new StageBounds(world, MAP_WIDTH/2, MAP_HEIGHT/2);
 
-        bg = new Texture("images/clock-ascii.png");
+        bg = null; //The background is optional.
+        //bg = new Texture("images/hills.jpg");
+
+        //create our game HUD for scores/timers/level info
+        hud = new Hud(sb, shifts, levelIndex+1, 1);
+
 
     }
 
@@ -110,11 +117,13 @@ public class PlayScreen implements Screen, ContactListener{
 
         //---PART II--- The rendering!
         //Clear the game screen with Black
+        if(bg==null){
         Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        //bgsb.begin();
-        //bgsb.draw(bg, 0, 0, Main.V_WIDTH, Main.V_HEIGHT); //code toc draw background
-        //bgsb.end();
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);}
+        else{
+        bgsb.begin();
+        bgsb.draw(bg, 0, 0, Main.V_WIDTH, Main.V_HEIGHT); //code toc draw background
+        bgsb.end();}
 
         mapRenderer.setView(gameCamera);
         mapRenderer.render();
@@ -127,6 +136,9 @@ public class PlayScreen implements Screen, ContactListener{
 
         if(showb2drLines)box2DDebugRenderer.render(world, b2drCamera.combined);
 
+        //Set our batch to now draw what the Hud camera sees.
+        sb.setProjectionMatrix(hud.stage.getCamera().combined);
+        hud.stage.draw();
 
 
     }
@@ -135,6 +147,7 @@ public class PlayScreen implements Screen, ContactListener{
 
         player.update(delta);
         world.step(1 / 60f, 8, 3);    // 60 FPS
+        hud.update(delta);
     }
 
     public void handleInput(float delta){
@@ -174,6 +187,7 @@ public class PlayScreen implements Screen, ContactListener{
         updateCameraRotationBasedOnPlayerOrientation();
         stageBounds.setOrientation(player.getOrientation());
         shifts-=1;
+        hud.setShifts(shifts);
     }
 
     public void playerMovementEvent(int keycode){
@@ -239,6 +253,7 @@ public class PlayScreen implements Screen, ContactListener{
         goal.dispose();
         for(Platform platform: platforms) platform.dispose();
         bg.dispose();
+        hud.dispose();
 
     }
 
