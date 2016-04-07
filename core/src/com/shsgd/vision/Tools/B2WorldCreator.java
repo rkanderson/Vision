@@ -13,6 +13,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.shsgd.vision.GameObjects.Goal;
 import com.shsgd.vision.GameObjects.Platform;
+import com.shsgd.vision.GameObjects.SimpleHazard;
 import com.shsgd.vision.Screens.PlayScreen;
 import com.shsgd.vision.Player;
 import static com.shsgd.vision.Screens.PlayScreen.PPM;
@@ -22,16 +23,10 @@ import static com.shsgd.vision.Screens.PlayScreen.PPM;
  */
 public class B2WorldCreator {
     Array<Platform> platforms = new Array<Platform>();
+    Array<SimpleHazard> simpleHazards = new Array<SimpleHazard>();
     Player player;
     Goal goal;
     public B2WorldCreator(PlayScreen playScreen, World world, Map map) {
-
-        //Create a Platform for all MapObjects in the Ground layer of my_map.tmx
-        for(MapObject object : map.getLayers().get("platforms").getObjects().getByType(RectangleMapObject.class)){
-            Rectangle rect  = ((RectangleMapObject)object).getRectangle();
-            platforms.add(new Platform(world, (rect.x+rect.width/2)/PlayScreen.PPM,
-                    (rect.y+rect.height/2)/PlayScreen.PPM, rect.width/PlayScreen.PPM, rect.height/PlayScreen.PPM));
-        }
 
         //find player spawn coordinates. I use an ellipse object to represent the spawn point (center is exact position)
         EllipseMapObject playerSpawn = (EllipseMapObject)(map.getLayers().get("player-spawn")
@@ -47,7 +42,26 @@ public class B2WorldCreator {
                 (goalEllipse.getEllipse().y + goalEllipse.getEllipse().height/2)/PPM, goalEllipse.getEllipse().width/2/PPM);
 
 
+
+        //Create a Platform for all MapObjects in the Ground layer of my_map.tmx
+        if(map.getLayers().get("platforms")!=null)
+        for(MapObject object : map.getLayers().get("platforms").getObjects().getByType(RectangleMapObject.class)){
+            Rectangle rect  = ((RectangleMapObject)object).getRectangle();
+            platforms.add(new Platform(world, (rect.x+rect.width/2)/PlayScreen.PPM,
+                    (rect.y+rect.height/2)/PlayScreen.PPM, rect.width/PlayScreen.PPM, rect.height/PlayScreen.PPM));
+        }
+
+        //Create simple hazards
+        if(map.getLayers().get("simple-hazards")!=null)
+        for(MapObject object : map.getLayers().get("simple-hazards").getObjects().getByType(RectangleMapObject.class)){
+            Rectangle rect  = ((RectangleMapObject)object).getRectangle();
+            simpleHazards.add(new SimpleHazard(world, (rect.x+rect.width/2)/PlayScreen.PPM,
+                    (rect.y+rect.height/2)/PlayScreen.PPM, rect.width/PlayScreen.PPM, rect.height/PlayScreen.PPM));
+
+        }
+
         //code for random polygons in fun-shape layer
+        if(map.getLayers().get("fun-shape")!=null)
         for(MapObject object : map.getLayers().get("fun-shape").getObjects().getByType(PolygonMapObject.class)){
             //System.out.println("omg");
             float vertices[] = ((PolygonMapObject)object).getPolygon().getVertices();
@@ -73,5 +87,9 @@ public class B2WorldCreator {
 
     public Goal getGoal() {
         return goal;
+    }
+
+    public Array<SimpleHazard> getSimpleHazards() {
+        return simpleHazards;
     }
 }

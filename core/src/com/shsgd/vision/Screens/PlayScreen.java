@@ -22,6 +22,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.shsgd.vision.GameObjects.Goal;
+import com.shsgd.vision.GameObjects.SimpleHazard;
 import com.shsgd.vision.GameObjects.StageBounds;
 import com.shsgd.vision.Main;
 import com.shsgd.vision.GameObjects.Platform;
@@ -117,10 +118,10 @@ public class PlayScreen implements Screen, ContactListener{
 
         //---PART II--- The rendering!
         //Clear the game screen with Black
-        if(bg==null){
+
         Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);}
-        else{
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        if(bg!=null){
         bgsb.begin();
         bgsb.draw(bg, 0, 0, Main.V_WIDTH, Main.V_HEIGHT); //code toc draw background
         bgsb.end();}
@@ -271,6 +272,12 @@ public class PlayScreen implements Screen, ContactListener{
         //If the player touches the yurScrewedLine, then kill the player and lose()
         if(a.getUserData() instanceof Player && b.getUserData() instanceof StageBounds.YurScrewedLine ||
                 a.getUserData() instanceof StageBounds.YurScrewedLine && b.getUserData() instanceof Player){
+            lose();
+        }
+
+        //force player to restart upon touching a simple hazard
+        if(a.getUserData() instanceof Player && b.getUserData() instanceof SimpleHazard ||
+                a.getUserData() instanceof SimpleHazard && b.getUserData() instanceof  Player){
             lose();
         }
 

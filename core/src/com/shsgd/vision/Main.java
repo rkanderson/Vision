@@ -2,6 +2,7 @@ package com.shsgd.vision;
 
 import com.badlogic.gdx.Game;
 import com.shsgd.vision.Screens.MenuScreen;
+import com.shsgd.vision.Screens.PlayScreen;
 
 public class Main extends Game {
     public static final String title = "VISION";
@@ -12,7 +13,8 @@ public class Main extends Game {
 	@Override
 	public void create () {
 		game = this;
-		setScreen(new MenuScreen(this));
+		setScreen(new PlayScreen(this, 0
+		));
 	}
 
 
