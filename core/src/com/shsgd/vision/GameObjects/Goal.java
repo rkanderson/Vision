@@ -7,6 +7,7 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
+import com.shsgd.vision.Utils.C;
 
 /**
  * Created by ryananderson on 3/27/16.
@@ -31,6 +32,7 @@ public class Goal {
         CircleShape shape = new CircleShape();
         shape.setRadius(radius);
         fixtureDef.shape = shape;
+        fixtureDef.filter.categoryBits = C.GOAL_BIT;
         fixture = body.createFixture(fixtureDef);
         fixture.setUserData(this);
         shape.dispose();

@@ -22,6 +22,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.shsgd.vision.GameObjects.Goal;
+import com.shsgd.vision.GameObjects.Lock;
 import com.shsgd.vision.GameObjects.SimpleHazard;
 import com.shsgd.vision.GameObjects.StageBounds;
 import com.shsgd.vision.Main;
@@ -29,15 +30,13 @@ import com.shsgd.vision.GameObjects.Platform;
 import com.shsgd.vision.Player;
 import com.shsgd.vision.Scenes.Hud;
 import com.shsgd.vision.Tools.B2WorldCreator;
+import com.shsgd.vision.Utils.C;
 
 /**
  * Created by ryananderson on 3/26/16.
  */
 public class PlayScreen implements Screen, ContactListener{
 
-    public static final float PPM = 16;
-    public static final float gravity_constant = 18;
-    public static final float MAP_WIDTH=16*16/PPM, MAP_HEIGHT=16*16/PPM; //in meters TODO change if map size changes
     private Main game;
     private int myLevelIndex;
     private OrthographicCamera gameCamera = new OrthographicCamera(), b2drCamera = new OrthographicCamera();
@@ -59,6 +58,7 @@ public class PlayScreen implements Screen, ContactListener{
     private Player player;
     private Goal goal;
     private Array<Platform> platforms = new Array<Platform>();
+    private Array<Lock> locks = new Array<Lock>();
     private StageBounds stageBounds;
     private Texture bg;
     private Hud hud;
@@ -76,11 +76,11 @@ public class PlayScreen implements Screen, ContactListener{
         //gameCamera.setToOrtho(false, Main.V_WIDTH / zoomFactor, Main.V_HEIGHT / zoomFactor);
         gameViewport = new FitViewport(Main.V_WIDTH / zoomFactor, Main.V_HEIGHT / zoomFactor, gameCamera);
         //b2drCamera.setToOrtho(false, Main.V_WIDTH / zoomFactor / PPM, Main.V_HEIGHT / zoomFactor / PPM);
-        b2drViewport = new FitViewport(Main.V_WIDTH/zoomFactor/PPM, Main.V_HEIGHT/zoomFactor/PPM, b2drCamera);
+        b2drViewport = new FitViewport(Main.V_WIDTH/zoomFactor/ C.PPM, Main.V_HEIGHT/zoomFactor/C.PPM, b2drCamera);
 
         inputProcessor = new MyInputProcessor(this);
 
-        world = new World(new Vector2(0, -gravity_constant), true);
+        world = new World(new Vector2(0, -C.gravity_constant), true);
         world.setContactListener(this);
 
         tmxMapLoader = new TmxMapLoader();
@@ -93,7 +93,8 @@ public class PlayScreen implements Screen, ContactListener{
         player = creator.getPlayer();
         goal = creator.getGoal();
         platforms = creator.getPlatforms();
-        stageBounds = new StageBounds(world, MAP_WIDTH/2, MAP_HEIGHT/2);
+        locks = creator.getLocks();
+        stageBounds = new StageBounds(world, C.MAP_WIDTH/C.PPM/2, C.MAP_HEIGHT/C.PPM/2);
 
         bg = null; //The background is optional.
         //bg = new Texture("images/hills.jpg");
@@ -132,7 +133,7 @@ public class PlayScreen implements Screen, ContactListener{
         //render player
         sb.setProjectionMatrix(gameCamera.combined);
         sb.begin();
-        sb.draw(player.getTexture(), (player.getBody().getPosition().x-player.getWidth()/2) * PPM, (player.getBody().getPosition().y-player.getHeight()/2)*PPM, player.getWidth()*PPM, player.getHeight()*PPM);
+        sb.draw(player.getTexture(), (player.getBody().getPosition().x-player.getWidth()/2) * C.PPM, (player.getBody().getPosition().y-player.getHeight()/2)*C.PPM, player.getWidth()*C.PPM, player.getHeight()*C.PPM);
         sb.end();
 
         if(showb2drLines)box2DDebugRenderer.render(world, b2drCamera.combined);
@@ -160,10 +161,10 @@ public class PlayScreen implements Screen, ContactListener{
         //REMEMBER b2drCamera uses meters and gameCamera uses pixels
         //in this method, I will update b2drCamera's position in meters and gameCamera
         //will copy it's position in pixels
-        b2drCamera.position.set(MAP_WIDTH/2, MAP_HEIGHT/2, 0);
+        b2drCamera.position.set(C.MAP_WIDTH/C.PPM/2, C.MAP_HEIGHT/C.PPM/2, 0);
         b2drCamera.update();
 
-        gameCamera.position.set(b2drCamera.position.x * PPM, b2drCamera.position.y * PPM, 0);
+        gameCamera.position.set(b2drCamera.position.x * C.PPM, b2drCamera.position.y * C.PPM, 0);
         gameCamera.update();
     }
 
@@ -201,7 +202,7 @@ public class PlayScreen implements Screen, ContactListener{
         b2drCamera.up.set(0, 1, 0);
         b2drCamera.direction.set(0, 0, -1);
         gameCamera.rotate(player.getOrientation()*-90);
-        b2drCamera.rotate(player.getOrientation()*-90);
+        b2drCamera.rotate(player.getOrientation() * -90);
     }
 
     public void importantPlayerKeyUpEvent(int keycode){
@@ -263,34 +264,36 @@ public class PlayScreen implements Screen, ContactListener{
         Fixture a = contact.getFixtureA();
         Fixture b = contact.getFixtureB();
 
-        //If a player foot and a platform touch, I should enable the player to jump
-        if(a.getUserData() instanceof Player.Foot && b.getUserData() instanceof Platform ||
-                a.getUserData() instanceof Platform && b.getUserData() instanceof Player.Foot){
-            player.setCanJump(true);
-        }
-
-        //If the player touches the yurScrewedLine, then kill the player and lose()
-        if(a.getUserData() instanceof Player && b.getUserData() instanceof StageBounds.YurScrewedLine ||
-                a.getUserData() instanceof StageBounds.YurScrewedLine && b.getUserData() instanceof Player){
-            lose();
-        }
-
-        //force player to restart upon touching a simple hazard
-        if(a.getUserData() instanceof Player && b.getUserData() instanceof SimpleHazard ||
-                a.getUserData() instanceof SimpleHazard && b.getUserData() instanceof  Player){
-            lose();
-        }
+        int cDef = a.getFilterData().categoryBits | b.getFilterData().categoryBits;
+        switch(cDef) {
+            //If a player foot and a platform touch, I should enable the player to jump
+            case C.PLAYER_FOOT_BIT | C.SOLID_BIT:
+                player.setCanJump(true);
+                break;
 
 
-        //If player and goal touch, then get to next level
-        if(a.getUserData() instanceof Player && b.getUserData() instanceof Goal ||
-                a.getUserData() instanceof Goal && b.getUserData() instanceof Player){
-            //System.out.println("next level is level "+(myLevelIndex+2));
-            if(myLevelIndex+1+1>Main.LEVEL_COUNT){
-                game.setScreen(new PlayScreen(game, -1));
-            } else {
-                game.setScreen(new PlayScreen(game, myLevelIndex + 1));
-            }
+            //If the player touches a hazard (or the YurScrewedLine), then kill the player and lose()
+            case C.PLAYER_BIT | C.SIMPLE_HAZARD_BIT:
+                lose();
+                break;
+
+            case C.PLAYER_BIT | C.LOCK_BIT:
+                Lock lock = a.getFilterData().categoryBits == Lock.fixtureDef.filter.categoryBits
+                        ? (Lock)a.getUserData() : (Lock)b.getUserData();
+                for(Lock l : locks){
+                    if(l.getId() == lock.getId()) l.destroy();
+                }
+                break;
+
+
+            //If player and goal touch, then get to next level
+            case C.PLAYER_BIT | C.GOAL_BIT:
+                if (myLevelIndex + 1 + 1 > Main.LEVEL_COUNT) {
+                    game.setScreen(new PlayScreen(game, -1));
+                } else {
+                    game.setScreen(new PlayScreen(game, myLevelIndex + 1));
+                }
+                break;
         }
 
     }
@@ -308,5 +311,9 @@ public class PlayScreen implements Screen, ContactListener{
     @Override
     public void postSolve(Contact contact, ContactImpulse impulse) {
 
+    }
+
+    public TiledMap getMap() {
+        return map;
     }
 }

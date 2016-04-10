@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="16" height="16" tilewidth="16" tileheight="16" nextobjectid="135">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="16" height="16" tilewidth="16" tileheight="16" nextobjectid="142">
  <properties>
   <property name="allowedShifts" type="int" value="3"/>
  </properties>
@@ -11,23 +11,22 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,251,251,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,251,251,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,251,251,0,0,0,0,2106,2107,0,0,0,0,
-0,0,0,0,251,251,0,0,0,0,2156,2157,0,0,0,0,
-0,0,0,0,251,251,0,0,0,0,302,302,0,0,0,0,
-0,0,0,0,251,251,0,0,0,0,302,302,0,0,0,0,
-0,0,0,0,251,251,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,251,251,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,251,251,0,0,0,0,0,0,0,0,0,0,
-0,0,511,0,251,251,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,2106,2107,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,2156,2157,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,302,302,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,302,302,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,2327,0,0,0,0,0,2327,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,2327,0,0,0,0,0,0,
+0,0,511,0,0,0,0,2277,0,2327,0,0,0,0,0,0,
 0,251,251,251,251,251,251,251,251,251,401,401,401,251,251,0,
 0,251,251,251,251,251,251,251,251,251,251,251,251,251,251,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
  <objectgroup name="platforms">
-  <object id="121" x="64" y="48" width="32" height="160"/>
   <object id="122" x="16" y="208" width="144" height="32"/>
   <object id="129" x="160" y="112" width="32" height="32"/>
   <object id="130" x="160" y="224" width="80" height="16"/>
@@ -37,6 +36,28 @@
   <object id="134" x="160" y="211.932" width="48" height="12.068"/>
  </objectgroup>
  <objectgroup name="fun-shape"/>
+ <objectgroup name="locks">
+  <object id="135" x="144" y="160" width="16" height="16">
+   <properties>
+    <property name="id" value="0"/>
+   </properties>
+  </object>
+  <object id="136" x="144" y="176" width="16" height="16">
+   <properties>
+    <property name="id" value="0"/>
+   </properties>
+  </object>
+  <object id="137" x="144" y="192" width="16" height="16">
+   <properties>
+    <property name="id" value="0"/>
+   </properties>
+  </object>
+  <object id="140" x="48" y="160" width="16" height="16">
+   <properties>
+    <property name="id" value="1"/>
+   </properties>
+  </object>
+ </objectgroup>
  <objectgroup name="goal">
   <object id="127" x="32" y="192" width="16" height="16">
    <ellipse/>

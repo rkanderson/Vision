@@ -10,6 +10,7 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.shsgd.vision.Utils.C;
 
 /**
  * Created by ryananderson on 3/26/16.
@@ -56,6 +57,8 @@ public class Player {
         fixtureDef.density = 1.0f;
         fixtureDef.restitution = 0.0f;
         fixtureDef.friction = 0.0f;
+        fixtureDef.filter.categoryBits = C.PLAYER_BIT;
+        fixtureDef.filter.maskBits = C.SOLID_BIT | C.GOAL_BIT | C.KEY_BIT | C.LOCK_BIT | C.SIMPLE_HAZARD_BIT;
         fixture = body.createFixture(fixtureDef);
         fixture.setUserData(this);
         rectangle.dispose();
@@ -65,6 +68,8 @@ public class Player {
         edgeShape.set(-width/4, -height/2-0.1f, width/4, -height/2-0.1f);
         fixtureDef.shape = edgeShape;
         fixtureDef.isSensor=true;
+        fixtureDef.filter.categoryBits = C.PLAYER_FOOT_BIT;
+        fixtureDef.filter.maskBits = C.SOLID_BIT;
         foot = body.createFixture(fixtureDef);
         foot.setUserData(new Foot(this, orientation));
         edgeShape.dispose();
@@ -191,10 +196,10 @@ public class Player {
     }
 
     public void updateWorldGravityBasedOnPlayerOrientation(){
-        if(orientation==0) world.setGravity(new Vector2(0, -com.shsgd.vision.Screens.PlayScreen.gravity_constant)); //down
-        else if(orientation==1) world.setGravity(new Vector2(com.shsgd.vision.Screens.PlayScreen.gravity_constant, 0)); //right
-        else if(orientation==2) world.setGravity(new Vector2(0, com.shsgd.vision.Screens.PlayScreen.gravity_constant)); //up
-        else if(orientation==3) world.setGravity(new Vector2(-com.shsgd.vision.Screens.PlayScreen.gravity_constant, 0)); //left
+        if(orientation==0) world.setGravity(new Vector2(0, -C.gravity_constant)); //down
+        else if(orientation==1) world.setGravity(new Vector2(C.gravity_constant, 0)); //right
+        else if(orientation==2) world.setGravity(new Vector2(0, C.gravity_constant)); //up
+        else if(orientation==3) world.setGravity(new Vector2(-C.gravity_constant, 0)); //left
     }
 
     public void keyUp(int keycode){
