@@ -12,6 +12,7 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.shsgd.vision.GameObjects.Goal;
+import com.shsgd.vision.GameObjects.Key;
 import com.shsgd.vision.GameObjects.Lock;
 import com.shsgd.vision.GameObjects.Platform;
 import com.shsgd.vision.GameObjects.SimpleHazard;
@@ -28,6 +29,7 @@ public class B2WorldCreator {
     Array<Platform> platforms = new Array<Platform>();
     Array<SimpleHazard> simpleHazards = new Array<SimpleHazard>();
     Array<Lock> locks = new Array<Lock>();
+    Array<Key> keys = new Array<Key>();
     Player player;
     Goal goal;
     public B2WorldCreator(PlayScreen playScreen, World world, Map map) {
@@ -70,7 +72,16 @@ public class B2WorldCreator {
                 Rectangle rect  = ((RectangleMapObject)object).getRectangle();
                 locks.add(new Lock(playScreen, world, (rect.x + rect.width / 2) / C.PPM,
                         (rect.y + rect.height / 2) / C.PPM, rect.width / C.PPM, rect.height / C.PPM,
-                        Integer.parseInt((String)object.getProperties().get("id"))));
+                        Integer.parseInt((String) object.getProperties().get("id"))));
+
+            }
+
+        //Create locks
+        if(map.getLayers().get("keys")!=null)
+            for(MapObject object : map.getLayers().get("keys").getObjects().getByType(RectangleMapObject.class)){
+                Rectangle rect  = ((RectangleMapObject)object).getRectangle();
+                keys.add(new Key(playScreen.getMap(), world, (rect.x + rect.width / 2) / C.PPM,
+                        (rect.y + rect.height / 2) / C.PPM ));
 
             }
 

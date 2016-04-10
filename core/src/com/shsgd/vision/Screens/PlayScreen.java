@@ -22,8 +22,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.shsgd.vision.GameObjects.Goal;
+import com.shsgd.vision.GameObjects.Key;
 import com.shsgd.vision.GameObjects.Lock;
-import com.shsgd.vision.GameObjects.SimpleHazard;
 import com.shsgd.vision.GameObjects.StageBounds;
 import com.shsgd.vision.Main;
 import com.shsgd.vision.GameObjects.Platform;
@@ -278,11 +278,20 @@ public class PlayScreen implements Screen, ContactListener{
                 break;
 
             case C.PLAYER_BIT | C.LOCK_BIT:
+                if(player.getKeys()<=0) break;
                 Lock lock = a.getFilterData().categoryBits == Lock.fixtureDef.filter.categoryBits
                         ? (Lock)a.getUserData() : (Lock)b.getUserData();
                 for(Lock l : locks){
-                    if(l.getId() == lock.getId()) l.destroy();
+                    if(l.getId() == lock.getId()) l.disable();
                 }
+                player.useKey();
+                break;
+
+            case C.PLAYER_BIT | C.KEY_BIT:
+                Key key = a.getFilterData().categoryBits == Key.fixtureDef.filter.categoryBits ?
+                        (Key)a.getUserData() : (Key)b.getUserData();
+                key.disable();
+                player.keys += 1;
                 break;
 
 

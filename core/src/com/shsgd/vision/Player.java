@@ -27,6 +27,7 @@ public class Player {
     private Fixture fixture;
     private Fixture foot;
     private Texture texture;
+    public int keys = 0;
 
     //input booleans
     private boolean[] moveRight = {false, false}, moveLeft = {false, false};
@@ -237,6 +238,14 @@ public class Player {
     }
 
     public void setCanJump(boolean canJump){this.canJump=canJump;}
+
+    public int getKeys() {
+        return keys;
+    }
+
+    public void useKey(){
+        keys-=1;
+    }
 
     public class Foot {
         public Player player;

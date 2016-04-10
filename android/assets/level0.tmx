@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="16" height="16" tilewidth="16" tileheight="16" nextobjectid="142">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="16" height="16" tilewidth="16" tileheight="16" nextobjectid="146">
  <properties>
   <property name="allowedShifts" type="int" value="3"/>
  </properties>
@@ -20,7 +20,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,2327,0,0,0,0,0,2327,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,2327,0,0,0,0,0,0,
-0,0,511,0,0,0,0,2277,0,2327,0,0,0,0,0,0,
+0,0,511,0,0,2277,0,0,0,2327,0,0,0,0,0,0,
 0,251,251,251,251,251,251,251,251,251,401,401,401,251,251,0,
 0,251,251,251,251,251,251,251,251,251,251,251,251,251,251,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -36,6 +36,9 @@
   <object id="134" x="160" y="211.932" width="48" height="12.068"/>
  </objectgroup>
  <objectgroup name="fun-shape"/>
+ <objectgroup name="keys">
+  <object id="145" x="80" y="192" width="16" height="16"/>
+ </objectgroup>
  <objectgroup name="locks">
   <object id="135" x="144" y="160" width="16" height="16">
    <properties>

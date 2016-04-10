@@ -70,10 +70,10 @@ public class Lock {
         this.isOpened = isOpened;
     }
 
-    public void destroy() {
+    public void disable() {
         getCell().setTile(null);
         setCategoryFilter(C.DISABLED_BIT);
-        isOpened  =true;
+        isOpened = true;
     }
 
     public TiledMapTileLayer.Cell getCell(){

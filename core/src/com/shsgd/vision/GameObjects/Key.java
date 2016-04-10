@@ -2,8 +2,10 @@ package com.shsgd.vision.GameObjects;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.Map;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
@@ -17,14 +19,15 @@ import com.shsgd.vision.Utils.C;
  */
 public class Key implements Disposable {
     private World world;
+    private Map map;
     private Body body;
     private Fixture fixture;
 
-    private static float width=1;
-    private static float height=1;
+    private static float width=0.5f;
+    private static float height=0.5f;
 
     private static BodyDef bodyDef;
-    private static FixtureDef fixtureDef;
+    public static FixtureDef fixtureDef;
     private static PolygonShape rectangle;
 
     private static Texture texture; //TODO define texture
@@ -40,7 +43,8 @@ public class Key implements Disposable {
         fixtureDef.filter.categoryBits = C.KEY_BIT;
     }
 
-    public Key(World world, float x, float y) {
+    public Key(Map map, World world, float x, float y) {
+        this.map = map;
         this.world = world;
 
         //make box2d body and fixture
@@ -55,8 +59,21 @@ public class Key implements Disposable {
 
     }
 
-    public static void defineTextures(Map map){
+    public void disable(){
+        getCell().setTile(null);
+        setCategoryFilter(C.DISABLED_BIT);
+    }
 
+    public TiledMapTileLayer.Cell getCell(){
+        TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get("graphics-main");
+        return layer.getCell((int)(body.getPosition().x * C.PPM / C.TILE_WIDTH),
+                (int)(body.getPosition().y * C.PPM / C.TILE_HEIGHT));
+    }
+
+    public void setCategoryFilter(short filterBit){
+        Filter filter = new Filter();
+        filter.categoryBits = filterBit;
+        fixture.setFilterData(filter);
     }
 
     public void dispose(){
