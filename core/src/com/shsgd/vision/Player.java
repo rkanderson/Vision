@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
@@ -50,8 +51,10 @@ public class Player {
         body = world.createBody(bodyDef);
 
         //shape
-        PolygonShape rectangle = new PolygonShape();
-        rectangle.setAsBox(width/2, height/2);
+        //PolygonShape rectangle = new PolygonShape();
+        //rectangle.setAsBox(width/2, height/2);
+        CircleShape rectangle = new CircleShape();
+        rectangle.setRadius(width/2);
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = rectangle;

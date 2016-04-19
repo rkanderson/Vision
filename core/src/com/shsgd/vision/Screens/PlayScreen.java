@@ -47,11 +47,13 @@ public class PlayScreen implements Screen, ContactListener{
     private Box2DDebugRenderer box2DDebugRenderer = new Box2DDebugRenderer();
     private ShapeRenderer sr = new ShapeRenderer();
     private SpriteBatch sb = new SpriteBatch(), bgsb=new SpriteBatch();
-    private MyInputProcessor inputProcessor;
+    private PlayScreenInputProcessor inputProcessor;
 
     TmxMapLoader tmxMapLoader;
     TiledMap map;
     OrthogonalTiledMapRenderer mapRenderer;
+    int[] bgLayers = {0, 1}, foregroundLayers = {2};
+
     int shifts;
 
     private World world; //Box2D world yay!
@@ -64,13 +66,13 @@ public class PlayScreen implements Screen, ContactListener{
     private Hud hud;
 
     //input booleans
-    public boolean showb2drLines = false; //this gets true in MyInputProcessor
+    public boolean showb2drLines = false; //this gets true in PlayScreenInputProcessor
 
 
     public PlayScreen(Main game, int levelIndex){
         //@param levelIndex starts from zero; level1 == index 0
 
-        System.out.println("A new play screen has been created.");
+        //System.out.println("A new play screen has been created.");
         this.game = game;
         myLevelIndex = levelIndex;
         //gameCamera.setToOrtho(false, Main.V_WIDTH / zoomFactor, Main.V_HEIGHT / zoomFactor);
@@ -78,7 +80,7 @@ public class PlayScreen implements Screen, ContactListener{
         //b2drCamera.setToOrtho(false, Main.V_WIDTH / zoomFactor / PPM, Main.V_HEIGHT / zoomFactor / PPM);
         b2drViewport = new FitViewport(Main.V_WIDTH/zoomFactor/ C.PPM, Main.V_HEIGHT/zoomFactor/C.PPM, b2drCamera);
 
-        inputProcessor = new MyInputProcessor(this);
+        inputProcessor = new PlayScreenInputProcessor(this);
 
         world = new World(new Vector2(0, -C.gravity_constant), true);
         world.setContactListener(this);
@@ -86,7 +88,7 @@ public class PlayScreen implements Screen, ContactListener{
         tmxMapLoader = new TmxMapLoader();
         map = tmxMapLoader.load("level" + levelIndex + ".tmx");
         shifts = Integer.parseInt((String) map.getProperties().get("allowedShifts"));
-        System.out.println("Shifts: "+shifts);
+        //System.out.println("Shifts: "+shifts);
         mapRenderer = new OrthogonalTiledMapRenderer(map);
 
         B2WorldCreator creator = new B2WorldCreator(this, world, map);
@@ -119,16 +121,17 @@ public class PlayScreen implements Screen, ContactListener{
 
         //---PART II--- The rendering!
         //Clear the game screen with Black
-
-        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
         if(bg!=null){
         bgsb.begin();
-        bgsb.draw(bg, 0, 0, Main.V_WIDTH, Main.V_HEIGHT); //code toc draw background
-        bgsb.end();}
+        bgsb.draw(bg, 0, 0, Main.V_WIDTH, Main.V_HEIGHT); //code to draw background
+        bgsb.end();
+        }
 
         mapRenderer.setView(gameCamera);
-        mapRenderer.render();
+        mapRenderer.render(bgLayers);
 
         //render player
         sb.setProjectionMatrix(gameCamera.combined);
@@ -136,6 +139,7 @@ public class PlayScreen implements Screen, ContactListener{
         sb.draw(player.getTexture(), (player.getBody().getPosition().x-player.getWidth()/2) * C.PPM, (player.getBody().getPosition().y-player.getHeight()/2)*C.PPM, player.getWidth()*C.PPM, player.getHeight()*C.PPM);
         sb.end();
 
+        mapRenderer.render(foregroundLayers);
         if(showb2drLines)box2DDebugRenderer.render(world, b2drCamera.combined);
 
         //Set our batch to now draw what the Hud camera sees.
@@ -169,7 +173,7 @@ public class PlayScreen implements Screen, ContactListener{
     }
 
     public void restart(){
-        System.out.println("Level restarted");
+        //System.out.println("Level restarted");
         game.setScreen(new PlayScreen(game, myLevelIndex));
     }
 
@@ -265,12 +269,43 @@ public class PlayScreen implements Screen, ContactListener{
         Fixture b = contact.getFixtureB();
 
         int cDef = a.getFilterData().categoryBits | b.getFilterData().categoryBits;
-        switch(cDef) {
-            //If a player foot and a platform touch, I should enable the player to jump
+
+        if(containsBit(cDef, C.SOLID_BIT) && containsBit(cDef, C.PLAYER_FOOT_BIT)){
+            player.setCanJump(true);
+        }
+        if(containsBit(cDef, C.PLAYER_BIT) && containsBit(cDef, C.SIMPLE_HAZARD_BIT)){
+            lose();
+        }
+        if(containsBit(cDef, C.PLAYER_BIT) && containsBit(cDef, C.LOCK_BIT)){
+            if(player.getKeys()>0){
+                Lock lock = a.getFilterData().categoryBits == Lock.fixtureDef.filter.categoryBits
+                        ? (Lock)a.getUserData() : (Lock)b.getUserData();
+                for(Lock l : locks){
+                    if(l.getId() == lock.getId()) l.disable();
+                }
+                player.useKey();
+            }
+        }
+        if(containsBit(cDef, C.PLAYER_BIT) && containsBit(cDef, C.KEY_BIT)){
+            Key key = a.getFilterData().categoryBits == Key.fixtureDef.filter.categoryBits ?
+                    (Key)a.getUserData() : (Key)b.getUserData();
+            key.disable();
+            player.keys += 1;
+        }
+        if(containsBit(cDef, C.PLAYER_BIT) && containsBit(cDef, C.GOAL_BIT)){
+            if (myLevelIndex + 1 + 1 > Main.LEVEL_COUNT) {
+                game.setScreen(new PlayScreen(game, -1));
+            } else {
+                game.setScreen(new PlayScreen(game, myLevelIndex + 1));
+            }
+        }
+
+        /*switch(cDef) {
+
+            //If a player foot and a platform(or lock) touch, I should enable the player to jump
             case C.PLAYER_FOOT_BIT | C.SOLID_BIT:
                 player.setCanJump(true);
                 break;
-
 
             //If the player touches a hazard (or the YurScrewedLine), then kill the player and lose()
             case C.PLAYER_BIT | C.SIMPLE_HAZARD_BIT:
@@ -303,8 +338,12 @@ public class PlayScreen implements Screen, ContactListener{
                     game.setScreen(new PlayScreen(game, myLevelIndex + 1));
                 }
                 break;
-        }
+        }*/
 
+    }
+
+    public boolean containsBit(int bits, short containsBit){
+        return (bits & containsBit) > 0;
     }
 
     @Override

@@ -27,6 +27,7 @@ public class Hud implements Disposable{
     private int level;
     private int land;
 
+    private Color textColor = new Color(0, 1, 0, 1);
     //Scene2D widgets
     private Label levelLandLabel;
     private Label shiftsLabel;
@@ -70,11 +71,13 @@ public class Hud implements Disposable{
         Table t1 = new Table();
         t1.setFillParent(true);
         t1.top(); t1.left();
+        levelLandLabel.setColor(textColor);
         t1.add(levelLandLabel).padTop(10).padLeft(10);
 
         Table t2 = new Table();
         t2.setFillParent(true);
         t2.top(); t2.right();
+        shiftsLabel.setColor(textColor);
         t2.add(shiftsLabel).padTop(10).padRight(10);
 
         //add our table to the stage

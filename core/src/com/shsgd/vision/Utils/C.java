@@ -8,7 +8,8 @@ public class C {
 
     //MAP constants. Change if map properties change
     public static final int TILE_WIDTH = 16, TILE_HEIGHT = 16,
-            MAP_WIDTH = 16*TILE_WIDTH, MAP_HEIGHT=16*TILE_HEIGHT;
+            MAP_WIDTH = 16*TILE_WIDTH, MAP_HEIGHT=16*TILE_HEIGHT,
+            MENU_MAP_WIDTH = 600, MENU_MAP_HEIGHT = 600;
 
     //BOX2D BITS.
     public static final short OBJECT_BIT = 1,

@@ -7,14 +7,14 @@ import com.badlogic.gdx.InputProcessor;
 /**
  * Created by ryananderson on 3/26/16.
  */
-public class MyInputProcessor implements InputProcessor {
+public class PlayScreenInputProcessor implements InputProcessor {
 
     //Please note that this is only meant for PlayScreen.
     //Other screens implement InputProcessor directly inside the class
 
     com.shsgd.vision.Screens.PlayScreen playScreen;
 
-    public MyInputProcessor(com.shsgd.vision.Screens.PlayScreen callback) {
+    public PlayScreenInputProcessor(com.shsgd.vision.Screens.PlayScreen callback) {
         this.playScreen = callback;
         Gdx.input.setInputProcessor(this);
     }

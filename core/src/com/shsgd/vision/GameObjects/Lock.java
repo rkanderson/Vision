@@ -41,7 +41,7 @@ public class Lock {
         fixtureDef.density = 1.0f;
         fixtureDef.restitution = 0.0f;
         fixtureDef.friction = 0.0f;
-        fixtureDef.filter.categoryBits = C.LOCK_BIT;
+        fixtureDef.filter.categoryBits = C.LOCK_BIT | C.SOLID_BIT;
     }
 
     public Lock(PlayScreen ps, World world, float x, float y, float width, float height, int id) {
