@@ -2,6 +2,7 @@ package com.shsgd.vision;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -9,8 +10,8 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.shsgd.vision.Tools.PlayerAnimation;
 import com.shsgd.vision.Utils.C;
 
 /**
@@ -18,9 +19,9 @@ import com.shsgd.vision.Utils.C;
  */
 public class Player {
 
-    private float width = 0.9f, height = 0.9f;
-    private int moveSpeed = 4;
-    private int jumpForce = 8;
+    private float width = 1f, height = 1f;
+    private float moveSpeed = 4;
+    private float jumpForce = 6f;
     private int orientation; //0-3 gravity direction. 0=down, 1=right 2=up 3=left
 
     private World world;
@@ -28,7 +29,9 @@ public class Player {
     private Fixture fixture;
     private Fixture foot;
     private Texture texture;
+    private PlayerAnimation animation;
     public int keys = 0;
+    boolean facingRight = true;
 
     //input booleans
     private boolean[] moveRight = {false, false}, moveLeft = {false, false};
@@ -41,7 +44,8 @@ public class Player {
     public Player(World world, float x, float y) {
         this.world = world;
         orientation = 0; //zero by default
-        texture = new Texture("character.png");
+        texture = new Texture("demon_spritesheet_full.png");
+        animation = new PlayerAnimation(this, texture, 6, 0.7f);
 
         //make box2d body and fixture
         BodyDef bodyDef = new BodyDef();
@@ -100,6 +104,9 @@ public class Player {
             else body.setLinearVelocity(body.getLinearVelocity().x, 0);
         }
 
+        if(moveRight[0])facingRight=true;
+        else if(moveLeft[0])facingRight=false;
+
         //Perhaps I shouldJump too :). again, varies with orientation
         if(shouldJump && canJump){
             shouldJump=false;
@@ -120,42 +127,20 @@ public class Player {
             }
         }
 
-    }
+        //change animations states as appropriate
+        if(!canJump) animation.setAnimationState(2);
 
-    public void updateFootBasedOnOrientation(){
-        //Updates the player foot based on the current orientation.
-        //This method should be called whenever the gravity is changed
-        ((Foot) foot.getUserData()).setOrientation(orientation);
-        EdgeShape footShape = (EdgeShape)foot.getShape();
+        else if(moveLeft[0] || moveRight[0]) animation.setAnimationState(1);
 
-        switch (orientation){
-            //Update the fixture properties
-            case 0:
-                footShape.set(-width/4, -height/2-0.1f, width/4, -height/2-0.1f);
-                break;
-            case 1:
-                footShape.set(width/2+0.1f, height/4, width/2+0.1f, -height/4);
-                break;
-            case 2:
-                footShape.set(-width/4, height/2+0.1f, width/4, height/2+0.1f);
-                break;
-            case 3:
-                footShape.set(-width/2-0.1f, height/4, -width/2-0.1f, -height/4);
-                break;
-
+        else if(!moveRight[0] && !moveLeft[0] && canJump) {
+            animation.setAnimationState(0);
         }
-    }
 
-    //PlayScreen will pass down input events important to the player class
-    public void keyDown(int keycode){
-
-
-
-            //what about changing gravity? (WASD)
-
-
+        animation.update(delta);
 
     }
+
+
 
     public void movementEvent(int keycode){
         if(keycode == Input.Keys.UP){
@@ -196,7 +181,8 @@ public class Player {
         updateWorldGravityBasedOnPlayerOrientation();
         body.setLinearVelocity(0, 0); //stop moving just cuz
         body.setAwake(true);
-        updateFootBasedOnOrientation();
+        //updateFootBasedOnOrientation();
+        body.setTransform(body.getPosition().x, body.getPosition().y, (float)(orientation*Math.PI/2));
     }
 
     public void updateWorldGravityBasedOnPlayerOrientation(){
@@ -224,8 +210,8 @@ public class Player {
         return body;
     }
 
-    public Texture getTexture() {
-        return texture;
+    public TextureRegion getTexture() {
+        return animation.getFrame();
     }
 
     public float getWidth() {
@@ -248,6 +234,10 @@ public class Player {
 
     public void useKey(){
         keys-=1;
+    }
+
+    public boolean isFacingRight() {
+        return facingRight;
     }
 
     public class Foot {
