@@ -96,7 +96,7 @@ public class MenuScreen implements Screen, InputProcessor {
         bmf.setColor(1,1,1,1);
         for(LevelButton btn: levelButtons){
             if(btn==null)continue;
-            glyphLayout.setText(bmf, Integer.toString(btn.levelIndex));
+            glyphLayout.setText(bmf, Integer.toString(btn.levelIndex+1));
             bmf.draw(sb, glyphLayout, btn.rect.x+btn.rect.width/2-glyphLayout.width/2,
                     btn.rect.y+btn.rect.height/2+glyphLayout.height/2);
         }
